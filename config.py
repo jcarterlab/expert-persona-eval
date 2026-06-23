@@ -10,12 +10,9 @@ import os
 
 load_dotenv()
 
-# --------------------------------------------------
-# API keys
-# --------------------------------------------------
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-
-
-
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
+BASIC_MODEL = os.getenv('BASIC_MODEL', 'gemini-2.5-flash-lite')
+RANDOM_SEED = int(os.getenv('RANDOM_SEED', 2026))
+DS_SAMPLE_NO = int(os.getenv('DS_SAMPLE_NO', 10))

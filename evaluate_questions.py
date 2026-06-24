@@ -56,17 +56,17 @@ def loop_over_questions(
                 )
 
                 save_result({
-                    'question': row['question'],
-                    'answer': row['answer'],
                     'result': result,
                     'category': row['category'],
-                    'is_expert': is_expert
+                    'is_expert': is_expert,
+                    'question': row['question'],
+                    'correct_answer': row['answer'],
+                    'llm_answer': response.text
                 })
 
                 logger.info(
-                        'result=%s response=%s',
-                        result,
-                        response.text
+                        'result=%s',
+                        result
                     )
 
                 break 

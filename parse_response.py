@@ -1,10 +1,14 @@
 import logging
 
+
 logger = logging.getLogger(__name__)
 
-def parse_response(response, answer):
 
-    letters = ['(A)', '(B)', '(C)', '(D)', '(E)', '(F)', '(G)', '(H)', '(I)', '(J)']
+def parse_response(response_text: str, answer: str):
+
+    letters = [
+        '(A)', '(B)', '(C)', '(D)', '(E)', '(F)', '(G)', '(H)', '(I)', '(J)'
+    ]
 
     correct_answer = '(' + answer + ')'
 
@@ -16,8 +20,9 @@ def parse_response(response, answer):
             incorect_answers
         )
     
-    correct = correct_answer in response
-    incorrect = any([(letter in response) for letter in incorect_answers])
+    correct = correct_answer in response_text
+    
+    incorrect = any([(letter in response_text) for letter in incorect_answers])
 
     if correct and not incorrect:
         return 'pass'

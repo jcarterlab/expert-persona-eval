@@ -1,23 +1,18 @@
 import logging
-import random
-import time
+from types import ModuleType
 from datetime import datetime, timezone
 
 from google import genai
-import pandas as pd
 from datasets import load_dataset
 
 import config
-
-from create_prompt import create_prompt
-from parse_response import parse_response
-from save_result import save_result
+from evaluate_questions import evaluate_questions
 
 
 logger = logging.getLogger(__name__)
 
 
-def configure_logging(config):
+def configure_logging(config: ModuleType):
     """
     Configure application logging.
 
@@ -42,43 +37,18 @@ def configure_logging(config):
     logging.getLogger('google_genai').setLevel(logging.WARNING)
 
 
-def run_eval(client, config):
+def run_eval(client: genai.Client, config):
     
     ds = load_dataset('TIGER-Lab/MMLU-Pro', split='test')
-    
+
     sample_ds = ds.shuffle(seed=config.RANDOM_SEED).select(range(config.DS_SAMPLE_NO))
 
-    for q in sample_ds:
+    evaluate_questions(
+        client, 
+        sample_ds, 
+        config
+    )
 
-        prompt = create_prompt(
-            q['question'], 
-            q['options'], 
-            q['category']
-        )
-
-        response = client.models.generate_content(
-            model=config.BASIC_MODEL, 
-            contents=prompt
-        )
-
-        result = parse_response(
-            response.text, 
-            q['answer']
-        )
-
-        save_result({
-            'question': q['question'],
-            'answer': q['answer'],
-            'result': result,
-            'category': q['category'],
-        })
-
-        logger.info(
-                'result=%s response=%s',
-                result,
-                response.text
-            )
-        
 
 if __name__ == '__main__':
 

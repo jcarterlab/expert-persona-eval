@@ -6,6 +6,7 @@ from google import genai
 from datasets import load_dataset
 
 import config
+from filter_questions import filter_questions
 from evaluate_questions import evaluate_questions
 
 
@@ -30,8 +31,7 @@ def configure_logging(config: ModuleType):
             '%(name)s | %(message)s'
         )
     )
-
-    logging.getLogger('selenium').setLevel(logging.WARNING)
+    
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('httpcore').setLevel(logging.WARNING)
     logging.getLogger('google_genai').setLevel(logging.WARNING)
@@ -41,7 +41,9 @@ def run_eval(client: genai.Client, config):
     
     ds = load_dataset('TIGER-Lab/MMLU-Pro', split='test')
 
-    sample_ds = ds.shuffle(seed=config.RANDOM_SEED).select(range(config.DS_SAMPLE_NO))
+    sample_ds = filter_questions(
+        ds.shuffle(seed=config.RANDOM_SEED).select(range(config.DS_SAMPLE_NO))
+    )
 
     evaluate_questions(
         client, 

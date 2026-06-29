@@ -1,6 +1,7 @@
 import logging
 from types import ModuleType
 import time
+from datetime import datetime, timezone
 
 from google import genai
 from datasets import Dataset
@@ -55,13 +56,16 @@ def loop_over_questions(
                     row['answer']
                 )
 
+                response_time = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
                 save_result({
                     'result': result,
                     'category': row['category'],
                     'is_expert': is_expert,
                     'question': row['question'],
                     'correct_answer': row['answer'],
-                    'llm_answer': response.text
+                    'llm_answer': response.text,
+                    'asked_at': response_time
                 })
 
                 logger.info(

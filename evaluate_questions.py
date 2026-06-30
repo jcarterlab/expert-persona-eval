@@ -4,10 +4,12 @@ import time
 from datetime import datetime, timezone
 
 from google import genai
+from google.genai import types
 from datasets import Dataset
 
 from prompts.question import v1
 from parse_response import parse_response
+from filter_questions import filter_questions
 from save_result import save_result
 
 
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def loop_over_questions(
         client: genai.Client, 
-        sample_ds: Dataset, 
+        filtered_ds: Dataset, 
         config: ModuleType,
         is_expert: bool = False
     ):
@@ -26,7 +28,7 @@ def loop_over_questions(
 
     first_inference = True
 
-    for row in sample_ds:
+    for row in filtered_ds:
 
         for attempt in range(1, retry_attempts + 1):
 
@@ -48,7 +50,10 @@ def loop_over_questions(
 
                 response = client.models.generate_content(
                     model=config.BASIC_MODEL, 
-                    contents=prompt
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.0
+                    )
                 )
 
                 result = parse_response(
@@ -104,9 +109,15 @@ def evaluate_questions(
 
     for condition in is_expert_conditions:
 
+        filtered_ds = filter_questions(
+            sample_ds, 
+            condition,
+            config
+        )
+
         loop_over_questions(
             client, 
-            sample_ds, 
+            filtered_ds, 
             config,
             is_expert=condition
         )

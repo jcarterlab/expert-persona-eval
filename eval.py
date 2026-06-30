@@ -3,10 +3,10 @@ from types import ModuleType
 from datetime import datetime, timezone
 
 from google import genai
+from google.genai import types
 from datasets import load_dataset
 
 import config
-from filter_questions import filter_questions
 from evaluate_questions import evaluate_questions
 
 
@@ -31,7 +31,7 @@ def configure_logging(config: ModuleType):
             '%(name)s | %(message)s'
         )
     )
-    
+
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('httpcore').setLevel(logging.WARNING)
     logging.getLogger('google_genai').setLevel(logging.WARNING)
@@ -41,9 +41,7 @@ def run_eval(client: genai.Client, config):
     
     ds = load_dataset('TIGER-Lab/MMLU-Pro', split='test')
 
-    sample_ds = filter_questions(
-        ds.shuffle(seed=config.RANDOM_SEED).select(range(config.DS_SAMPLE_NO))
-    )
+    sample_ds = ds.shuffle(seed=config.RANDOM_SEED).select(range(config.DS_SAMPLE_NO))
 
     evaluate_questions(
         client, 
@@ -68,7 +66,8 @@ if __name__ == '__main__':
             )
 
         client = genai.Client(
-            api_key=config.GEMINI_API_KEY
+            api_key=config.GEMINI_API_KEY,
+            http_options=types.HttpOptions(timeout=60000)
         )
 
         run_eval(client, config)

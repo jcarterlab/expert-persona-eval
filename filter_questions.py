@@ -1,19 +1,23 @@
 import os
 import logging
+from types import ModuleType
 import json
+
+from datasets import Dataset
 
 logger = logging.getLogger(__name__)
 
 
 def filter_questions(
-        sample_ds,
-        is_expert,
-        config
+        sample_ds: Dataset, 
+        condition: bool,
+        prompt_identifier: str,
+        config: ModuleType
     ):
 
     logger.info(
-        'filtering questions is_expert=%s',
-        is_expert
+        'filtering questions condition=%s',
+        condition
     )
 
     completed = set()
@@ -29,7 +33,7 @@ def filter_questions(
                 obj = json.loads(line)
 
                 if (
-                    obj.get("is_expert") != is_expert
+                    obj.get("is_expert") != condition
                     or obj.get("model") != config.BASIC_MODEL
                 ):
                     continue
@@ -53,8 +57,8 @@ def filter_questions(
     filtered_ds = sample_ds.filter(
         lambda x: (
             x['question'],
-            x.get('is_expert'),
-            x.get('prompt')
+            condition,
+            prompt_identifier
         ) not in completed
     )
 

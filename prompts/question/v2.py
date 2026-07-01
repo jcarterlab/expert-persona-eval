@@ -38,4 +38,4 @@ def create_prompt(
         f'Options:\n{options}'
     )
 
-    return prompt.strip(), PROMPT_NAME + '_' + PROMPT_VERSION
+    return prompt.strip()

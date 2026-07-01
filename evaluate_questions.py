@@ -16,6 +16,9 @@ from save_result import save_result
 logger = logging.getLogger(__name__)
 
 
+prompt_identifier = v2.PROMPT_NAME + '_' + v2.PROMPT_VERSION
+
+
 def loop_over_questions(
         client: genai.Client, 
         filtered_ds: Dataset, 
@@ -41,7 +44,7 @@ def loop_over_questions(
 
             try:
 
-                prompt, prompt_identifier = v2.create_prompt(
+                prompt = v2.create_prompt(
                     row['question'], 
                     row['options'], 
                     row['category'],
@@ -71,7 +74,8 @@ def loop_over_questions(
                     'correct_answer': row['answer'],
                     'llm_answer': response.text,
                     'asked_at': response_time,
-                    'prompt': prompt_identifier
+                    'prompt': prompt_identifier,
+                    'model': config.BASIC_MODEL
                 })
 
                 logger.info(
@@ -113,6 +117,7 @@ def evaluate_questions(
         filtered_ds = filter_questions(
             sample_ds, 
             condition,
+            prompt_identifier,
             config
         )
 

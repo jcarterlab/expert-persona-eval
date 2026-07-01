@@ -2,12 +2,11 @@ import os
 import logging
 import json
 
-
 logger = logging.getLogger(__name__)
 
 
 def filter_questions(
-        sample_ds, 
+        sample_ds,
         is_expert,
         config
     ):
@@ -17,7 +16,7 @@ def filter_questions(
         is_expert
     )
 
-    successful_questions = set()
+    completed = set()
 
     if os.path.exists('results.jsonl'):
         with open('results.jsonl', 'r', encoding='utf-8') as f:
@@ -29,19 +28,34 @@ def filter_questions(
 
                 obj = json.loads(line)
 
-                if obj.get('is_expert') != is_expert:
+                if (
+                    obj.get("is_expert") != is_expert
+                    or obj.get("model") != config.BASIC_MODEL
+                ):
                     continue
 
                 if config.RETRY_PARSE_FAILURES:
-
                     if obj.get('result') != 'parse_failure':
-                        successful_questions.add(obj['question'])
-
+                        key = (
+                            obj.get('question'),
+                            obj.get('is_expert'),
+                            obj.get('prompt')
+                        )
+                        completed.add(key)
                 else:
-                    successful_questions.add(obj['question'])
+                    key = (
+                        obj.get('question'),
+                        obj.get('is_expert'),
+                        obj.get('prompt')
+                    )
+                    completed.add(key)
 
     filtered_ds = sample_ds.filter(
-        lambda x: x['question'] not in successful_questions
+        lambda x: (
+            x['question'],
+            x.get('is_expert'),
+            x.get('prompt')
+        ) not in completed
     )
 
     logger.info(

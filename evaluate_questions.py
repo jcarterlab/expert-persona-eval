@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 from datasets import Dataset
 
-from prompts.question import v1
+from prompts.question import v2
 from parse_response import parse_response
 from filter_questions import filter_questions
 from save_result import save_result
@@ -41,7 +41,7 @@ def loop_over_questions(
 
             try:
 
-                prompt = v1.create_prompt(
+                prompt, prompt_identifier = v2.create_prompt(
                     row['question'], 
                     row['options'], 
                     row['category'],
@@ -70,7 +70,8 @@ def loop_over_questions(
                     'question': row['question'],
                     'correct_answer': row['answer'],
                     'llm_answer': response.text,
-                    'asked_at': response_time
+                    'asked_at': response_time,
+                    'prompt': prompt_identifier
                 })
 
                 logger.info(

@@ -6,7 +6,7 @@ dataset in order to test the accuracy of LLMs.
 """
 
 PROMPT_NAME = 'question'
-VERSION = 'v1'
+PROMPT_VERSION = 'v1'
 
 
 def create_prompt(
@@ -41,4 +41,4 @@ Options:
 {options}
 '''.strip()
     
-    return prompt
+    return prompt, PROMPT_NAME + '_' + PROMPT_VERSION

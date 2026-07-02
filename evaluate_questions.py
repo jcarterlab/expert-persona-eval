@@ -37,10 +37,10 @@ def loop_over_questions(
 
             wait_time = llm_wait_time * (2 ** (attempt - 1))
 
-            if first_inference:
-                first_inference = False
-            else:
+            if not first_inference:
                 time.sleep(wait_time)
+                
+            first_inference = False
 
             try:
 
@@ -127,3 +127,5 @@ def evaluate_questions(
             config,
             is_expert=condition
         )
+
+        time.sleep(config.LLM_WAIT_TIME)

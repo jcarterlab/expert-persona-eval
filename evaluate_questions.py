@@ -111,6 +111,7 @@ def evaluate_questions(
     ):
 
     is_expert_conditions = [True, False]
+    first_loop = True
 
     for condition in is_expert_conditions:
 
@@ -128,4 +129,8 @@ def evaluate_questions(
             is_expert=condition
         )
 
-        time.sleep(config.LLM_WAIT_TIME)
+        if not first_loop:
+            time.sleep(config.LLM_WAIT_TIME)
+
+        first_loop = False
+        

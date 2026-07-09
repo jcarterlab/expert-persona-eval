@@ -51,6 +51,8 @@ def loop_over_questions(
                     is_expert
                 )
 
+                print(prompt)
+
                 response = client.models.generate_content(
                     model=config.BASIC_MODEL, 
                     contents=prompt,

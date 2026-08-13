@@ -81,7 +81,7 @@ Each successful LLM response is stored as a JSON object in a JSONL file, includi
 | **Expert pass rate**  |                 49.8% |
 | **Difference**        | +1.0 percentage point |
 
-![Pass Rate by Category](assets/pass_rate_by_category.png)
+![Pass Rate by Category](assets/pass_rates_desktop.svg)
 
 ### Inferential Statistics
 
@@ -91,9 +91,9 @@ Each successful LLM response is stored as a JSON object in a JSONL file, includi
 | **Bootstrap CI**                 | [-1.60%, 3.80%] |
 | **Exact McNemar's test p-value** |            0.55 |
 
-![Bootstrap Histogram](assets/bootstrap_histogram.png)
+![Bootstrap Histogram](assets/bootstrap_histogram_desktop.svg)
 
-<img src="assets/mcnemar_table.png" alt="McNemar Table" width="350">
+<img src="assets/mcnemar_table.svg" alt="McNemar Table" width="350">
 
 ### Interpretation
 

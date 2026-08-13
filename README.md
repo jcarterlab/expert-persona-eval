@@ -1,49 +1,38 @@
 # 🧪 Expert Persona Eval
 
-An evaluation testing whether prompting an LLM with an expert persona improves accuracy on reasoning tasks.
+## Research Question
 
-The experiment compares two conditions, a control condition with no persona and an experimental condition with an expert persona, on the same set of 500 randomly selected questions from the MMLU-Pro dataset. Both conditions use the gemini-2.5-flash-lite model at temperature 0 to minimise randomness, isolating the effect of the persona itself. The results are analysed using bootstrapping to estimate uncertainty around the observed effect size and the Exact McNemar's test to assess statistical significance. It finds a lack of evidence for expert persona efficacy.
+Does prompting an LLM with an expert persona improve its accuracy on reasoning tasks?
 
-**Key technologies:** Python, Jupyter, Pandas, NumPy, Google Gemini API, Matplotlib.
+## Hypothesis
 
-## 🔍 Overview
+An expert persona will improve model accuracy compared with an otherwise identical prompt without a persona.
 
-This evaluation involves the following steps: 
+## Evaluation Setup
 
-1. Design elements
-2. Data collection
-3. Data analysis
-4. Interpretation
+| Element         | Details                                              |
+| --------------- | ---------------------------------------------------- |
+| **Conditions**  | No persona (control) · Expert persona (experimental) |
+| **Dataset**     | MMLU-Pro — 500 randomly selected questions           |
+| **Model**       | `gemini-2.5-flash-lite`                              |
+| **Temperature** | 0                                                    |
+| **Analysis**    | Bootstrapping · Exact McNemar's test                 |
 
-## 📐 Design elements
+The model temperature was set to 0 to minimise randomness and isolate the effect of the persona.
 
-The evaluation was designed based on the following core elements:
+**Key technologies:** Python · Jupyter · Pandas · NumPy · Google Gemini API · Matplotlib
 
-| Element | Details |
-|---|---|
-| **Conditions** | No persona (control) · Expert persona (experimental) |
-| **Dataset** | MMLU-Pro — 500 randomly selected questions |
-| **Model(s)** | gemini-2.5-flash-lite |
-| **LLM settings** | Temperature: 0 |
-| **Evaluation** | Bootstrapping · Exact McNemar's test |
+## Dataset
 
-## 🛢️ Data collection
+The evaluation uses the **MMLU-Pro** dataset, loaded from Hugging Face.
 
-### Dataset 
+A random sample of 500 questions was selected. A filtering mechanism prevents questions previously answered under the same prompt version and condition from being processed again. This allows the sample to be incrementally increased across runs using the same random seed.
 
-The MMLU-Pro dataset is loaded in from Hugging Face. 
-
-### Sampling
-
-The dataset is randomly sampled. 
-
-### Filtering
-
-A filtering mechanism is used to prevent previously answered questions under the same prompt version and condition from being processed twice. This allows the user to set the same random seed and incrementally increase the sample number rather than try to process 500 questions for each condition in one run (this would take a long time). 
+## Methodology
 
 ### Prompting
 
-The following example prompt is constructed for the expert condition (the control condion prompt is identical minus the first line): 
+The control and experimental prompts are identical except that the experimental condition begins with an expert persona:
 
 ```text
 You are an expert in physics.
@@ -58,55 +47,65 @@ Example answer:
 Do not return anything else. Do not explain your reasoning.
 
 Even if you think you do not have enough information to answer the question, try anyway.
-
-Question:
-An airplane is flying at Mach 1.75 at an altitude of 8000 m, where the speed of sound is How long after the plane passes directly overhead will you hear the sonic boom? (Unit: m/s)
-
-Options:
-['800', '520', '500', '700', '750', '650', '850', '450', '560', '600']
 ```
 
-### Response parsing
+The model is instructed to return only the letter corresponding to the correct answer.
 
-The model is asked to return the corresponding letter of the correct answer in brackets. This proves quite useful, since despite telling the model not to explain its reasoning, it often does. Long answers provide more oppourtunities for misparsing. A letter encapsulated in brackets is often more unique and easier to parse than a letter on its own (look at the first letter of this sentence: 'A lot of sentences contain single letters...').
+### Response Parsing
 
-The parsing logic that follows is quite strict. If the bracket encapsulated letter of the correct answer is found and none of the incorrect answers, it is marked as having passed. If an incorect letter is found and not the correct letter, it is marked as having failed. If neither of these conditions is true, it is marked as a parse failure. Parse failures are retried on subsequent runs. 
+Strict parsing identifies three outcomes:
 
-### Results storage
+* **Pass** — the correct answer appears in brackets and no incorrect answer does
+* **Fail** — an incorrect answer appears in brackets and the correct answer does not
+* **Parse failure** — neither condition is satisfied
 
-The data generated by every question for which we receive a successful response from the LLM (pass, fail or parse_failure) is saved as a new json object in a jsonl file. Data from successful responses is saved each time before moving onto the next question. 
+Parse failures are retried on subsequent runs.
 
+### Results Storage
 
-## 📊 Data analysis
+Each successful LLM response is stored as a JSON object in a JSONL file, including pass, fail and parse-failure outcomes. Results are saved immediately after each response to allow interrupted runs to resume.
 
-### Descriptive statistics
+### Statistical Analysis
 
-| Statistic | Value |
-|---|---|
-| **Control pass rate** | 48.8% |
-| **Expert pass rate** | 49.8% |
-| **Difference** | 1% |
+**Bootstrapping** estimates uncertainty around the observed difference in pass rates.
+
+**Exact McNemar's test** assesses whether the paired difference between conditions is statistically significant.
+
+## Results
+
+### Descriptive Statistics
+
+| Statistic             |                 Value |
+| --------------------- | --------------------: |
+| **Control pass rate** |                 48.8% |
+| **Expert pass rate**  |                 49.8% |
+| **Difference**        | +1.0 percentage point |
 
 ![Pass Rate by Category](assets/pass_rate_by_category.png)
 
-## 🎲 Inferential statistics
+### Inferential Statistics
 
-| Method | Result |
-|---|---|
-| **Bootstrap SE** | 1.36% |
-| **Bootstrap CI** | [-1.60%, 3.80%] |
-| **Exact McNemar's test p-value** | 0.55 |
+| Method                           |          Result |
+| -------------------------------- | --------------: |
+| **Bootstrap SE**                 |           1.36% |
+| **Bootstrap CI**                 | [-1.60%, 3.80%] |
+| **Exact McNemar's test p-value** |            0.55 |
 
 ![Bootstrap Histogram](assets/bootstrap_histogram.png)
 
 <img src="assets/mcnemar_table.png" alt="McNemar Table" width="350">
 
-## 💡 Interpretation
+### Interpretation
 
-Within the scope of this experiment, there is no convincing evidence that an expert persona improves the performance of `gemini-2.5-flash-lite` on the MMLU-Pro dataset. Although the expert persona achieved a pass rate that was 1 percentage point higher than the control condition, both bootstrapping and the Exact McNemar's test indicate that this difference is consistent with random variation rather than a genuine effect. Overall, these results illustrate the importance of complementing descriptive statistics with inferential statistical methods. Small differences in benchmark scores can sometimes occur by chance.
+The results provide no convincing evidence that an expert persona improves the performance of `gemini-2.5-flash-lite` on MMLU-Pro.
 
-## ⚠️ Weaknesses
+Although the expert condition achieved a pass rate 1 percentage point higher than the control, the confidence interval includes zero and the Exact McNemar's test is not statistically significant. The observed difference is therefore consistent with random variation.
 
-The weaknesses of this experiment include the fact that it uses the MMLU-Pro dataset, a well-known public dataset that may have seeped into the model's training data, leading to data contamination (i.e. when a model recalls an answer rather than using reasoning to work it out). The experiment also uses only 500 unique questions, conducts a single run for each question, assigns a relatively simple expert persona with little detail and tests only a single model, limiting the wider generalisability of the findings.
+## Limitations
 
-
+* **Dataset contamination:** MMLU-Pro is a public benchmark and may have appeared in the model's training data, meaning some answers may reflect memorisation rather than reasoning.
+* **Sample size:** The evaluation uses only 500 questions.
+* **Single run:** Each question is evaluated once per condition.
+* **Simple persona:** The experimental persona consists of a relatively minimal expert instruction.
+* **Single model:** Only `gemini-2.5-flash-lite` is evaluated, limiting generalisability.
+* **Benchmark scope:** Results on MMLU-Pro may not translate directly to other datasets or real-world reasoning tasks.

@@ -1,4 +1,4 @@
-# 🧪 Expert Persona Eval
+# 🧑‍🏫 Expert Persona Eval
 
 ## Research Question
 
